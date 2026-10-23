@@ -60,6 +60,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allowed_hosts=settings.allowed_hosts,
         allowed_origins=settings.allowed_origins,
         max_body_bytes=settings.max_upload_bytes + 64 * 1024,
+        path_limits={"/api/admin/restore": 200 * 1024 * 1024 + 64 * 1024},
     )
 
     @app.exception_handler(IntegrityError)

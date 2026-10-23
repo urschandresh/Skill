@@ -52,8 +52,10 @@ class LocalSecurityMiddleware:
         allowed_hosts: Iterable[str],
         allowed_origins: Iterable[str],
         max_body_bytes: int,
+        path_limits: dict[str, int] | None = None,
     ) -> None:
         self.app = app
+        self.path_limits = path_limits or {}
         self.allowed_hosts = {h.lower() for h in allowed_hosts} | {"::1"}
         self.allowed_origins = {o.lower().rstrip("/") for o in allowed_origins}
         self.max_body_bytes = max_body_bytes
@@ -82,6 +84,7 @@ class LocalSecurityMiddleware:
 
         method = scope["method"].upper()
         path = scope.get("path", "")
+        limit = self.path_limits.get(path, self.max_body_bytes)
         if method in STATE_CHANGING_METHODS and path.startswith("/api"):
             origin = headers.get(b"origin")
             if origin is not None and origin.decode("latin-1").lower().rstrip("/") not in self.allowed_origins:
@@ -97,7 +100,7 @@ class LocalSecurityMiddleware:
             length = headers.get(b"content-length")
             if length is not None:
                 try:
-                    if int(length) > self.max_body_bytes:
+                    if int(length) > limit:
                         await self._reject(send, 413, "Request body too large")
                         return
                 except ValueError:
@@ -105,7 +108,6 @@ class LocalSecurityMiddleware:
                     return
 
         received = 0
-        limit = self.max_body_bytes
 
         async def limited_receive():
             nonlocal received

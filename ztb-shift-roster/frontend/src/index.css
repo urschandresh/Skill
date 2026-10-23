@@ -1,0 +1,116 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root,
+.dark {
+    /* ZTB ShiftOrbit: dark navy and blue */
+    --background: #0a1628;
+    --foreground: #e6edf8;
+    --card: #0f1f3a;
+    --card-foreground: #e6edf8;
+    --popover: #102341;
+    --popover-foreground: #e6edf8;
+    --primary: #2f80ed;
+    --primary-foreground: #ffffff;
+    --secondary: #16294a;
+    --secondary-foreground: #e6edf8;
+    --muted: #142644;
+    --muted-foreground: #9fb0cf;
+    --accent: #1b3360;
+    --accent-foreground: #ffffff;
+    --destructive: #ef4444;
+    --border: #1f355c;
+    --input: #26406f;
+    --ring: #3b82f6;
+    --chart-1: #38bdf8;
+    --chart-2: #6366f1;
+    --chart-3: #f59e0b;
+    --chart-4: #22c55e;
+    --chart-5: #f43f5e;
+    --radius: 0.625rem;
+    --sidebar: #071122;
+    --sidebar-foreground: #dbe5f5;
+    --sidebar-primary: #2f80ed;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #13284b;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #182c4f;
+    --sidebar-ring: #3b82f6;
+    color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
+  html {
+    @apply font-sans;
+    }
+}
+/* FullCalendar on the navy theme */
+.fc {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: var(--card);
+  --fc-neutral-bg-color: var(--muted);
+  --fc-today-bg-color: rgba(47, 128, 237, 0.12);
+  --fc-button-bg-color: var(--secondary);
+  --fc-button-border-color: var(--border);
+  --fc-button-active-bg-color: var(--primary);
+  --fc-button-hover-bg-color: var(--accent);
+  --fc-event-text-color: #0a1628;
+  font-size: 0.8rem;
+}
+.fc .fc-col-header-cell-cushion,
+.fc .fc-daygrid-day-number { color: var(--foreground); }
+
+.roster-grid th, .roster-grid td { border-color: var(--border); }
