@@ -43,6 +43,7 @@ class RunRequest:
     window_start: date | None = None
     window_end: date | None = None
     pending_leave_ids: list[int] = field(default_factory=list)
+    exclude_leave_ids: list[int] = field(default_factory=list)
     extra_locked: list[Slot] = field(default_factory=list)
 
 
@@ -179,6 +180,8 @@ def build_instance(session: Session, req: RunRequest, lenient: bool = False) -> 
     leave_q = select(LeaveRequest).where(LeaveRequest.analyst_id.in_(ids), LeaveRequest.start_date <= hi,
                                          LeaveRequest.end_date >= lo)
     for lv in session.scalars(leave_q):
+        if lv.id in req.exclude_leave_ids:
+            continue
         if lv.status != "approved" and lv.id not in req.pending_leave_ids:
             continue
         day = max(lv.start_date, lo)
@@ -268,7 +271,8 @@ def build_instance(session: Session, req: RunRequest, lenient: bool = False) -> 
     return inst, policy_snapshot
 
 
-def instance_for_roster(session: Session, roster: Roster, pending_leave_ids: list[int] | None = None) -> ProblemInstance:
+def instance_for_roster(session: Session, roster: Roster, pending_leave_ids: list[int] | None = None,
+                        exclude_leave_ids: list[int] | None = None) -> ProblemInstance:
     """The problem a stored roster must satisfy, using today's leave and settings."""
     snapshot = dict(roster.policy_snapshot or {})
     overrides = {k: v for k, v in snapshot.items() if k in PolicyFields.model_fields}
@@ -279,6 +283,7 @@ def instance_for_roster(session: Session, roster: Roster, pending_leave_ids: lis
         analyst_ids=[a for a in analyst_ids if a in existing], policy_id=snapshot.get("policy_id")
         if snapshot.get("policy_id") and session.get(SchedulingPolicy, snapshot["policy_id"]) else None,
         policy_overrides=overrides, pending_leave_ids=pending_leave_ids or [],
+        exclude_leave_ids=exclude_leave_ids or [],
     )
     inst, _ = build_instance(session, req, lenient=True)
     inst.locked = sorted(Slot(a.analyst_id, a.project_id, a.shift_template_id, a.date)
