@@ -15,8 +15,10 @@ if [[ -f "$RUN/backend.pid" ]] && kill -0 "$(cat "$RUN/backend.pid")" 2>/dev/nul
   exit 0
 fi
 
-(cd "$ROOT/backend" && ZTB_HOST=127.0.0.1 ZTB_PORT="$PORT" nohup "$VPY" run.py \
-  >"$RUN/backend.log" 2>"$RUN/backend.err.log" & echo $! >"$RUN/backend.pid")
+# `env` execs Python, so $! is the server's own PID (stop.sh relies on that).
+nohup env ZTB_HOST=127.0.0.1 ZTB_PORT="$PORT" "$VPY" "$ROOT/backend/run.py" \
+  >"$RUN/backend.log" 2>"$RUN/backend.err.log" &
+echo $! >"$RUN/backend.pid"
 
 for _ in $(seq 1 60); do
   sleep 1

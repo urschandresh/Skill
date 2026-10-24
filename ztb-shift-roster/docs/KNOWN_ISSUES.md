@@ -10,6 +10,9 @@ Honest list as of version 0.1.0. Items marked **UAT** need checking on a ZTB Win
      but **were never executed**. No PowerShell was available, and downloading one was not
      permitted in the build environment.
    - Expect possible first-run fixes.
+   - The Linux/macOS equivalents (`setup.sh`, `start.sh`, `stop.sh`) were run from a fresh
+     clone and work. They follow the same steps, so a Windows failure is most likely a
+     PowerShell-specific detail.
    - `start.ps1` starts the backend with `Start-Process -WindowStyle Hidden` plus output
      redirection. On some systems a console window may still appear briefly.
 2. **OR-Tools wheels on Windows (UAT).** `ortools==9.15.6755` publishes Windows wheels for
@@ -44,6 +47,10 @@ Honest list as of version 0.1.0. Items marked **UAT** need checking on a ZTB Win
    - Building very large models takes several seconds in Python before solving starts.
    - The maximum time limit is 600 s.
    - Laptop speed will differ.
+   - With soft preferences switched on, the reported "bound" can stay far below the objective
+     (e.g. objective 2.7 M vs bound 0.7 k after 15 s on the demo set). A large gap here mostly
+     means the solver could not *prove* how good the roster is. Some preference penalties are
+     unavoidable. It is not an error.
 8. **Non-deterministic optima.** Multi-threaded CP-SAT can return different, equally good
    rosters on repeated runs.
 9. **Month-boundary weeks.**

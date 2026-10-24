@@ -54,10 +54,22 @@ uses another port. Everything listens on 127.0.0.1 only.
 First run: **Settings & data → Backup & data → Load synthetic demo data** to try the tool with
 invented analysts, or create your own projects and analysts (or import them from Excel/CSV).
 
+## Quick start (Linux / macOS)
+
+```bash
+cd ztb-shift-roster
+./setup.sh            # once (add --dev for the test tools)
+./start.sh            # http://127.0.0.1:8000   (./start.sh 8001 for another port)
+./stop.sh
+```
+
+These scripts were run end-to-end from a fresh clone in the build environment (Python 3.11, 3.12
+and 3.13 all work).
+
 ## Manual start (any OS)
 
 ```bash
-cd backend && python3.11 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 cd ../frontend && npm ci && npm run build
 cd ../backend && .venv/bin/python run.py        # http://127.0.0.1:8000
 ```
@@ -66,7 +78,7 @@ cd ../backend && .venv/bin/python run.py        # http://127.0.0.1:8000
 
 | Suite | Command | Result in the cloud workspace |
 |---|---|---|
-| Backend (pytest) | `cd backend && .venv/bin/python -m pytest` | 72 passed |
+| Backend (pytest) | `cd backend && .venv/bin/python -m pytest` | 73 passed |
 | Frontend unit (Vitest) | `cd frontend && npm test` | 20 passed |
 | Type check | `cd frontend && npm run typecheck` | clean |
 | End-to-end (Playwright, desktop + mobile) | `cd frontend && npm run build && npx playwright test` | 8 passed |
@@ -88,6 +100,7 @@ frontend/e2e            Playwright end-to-end tests
 sample-data             SYNTHETIC example files
 docs                    architecture, user guide, security, known issues, UAT, phase report
 setup.ps1 start.ps1 stop.ps1   Windows scripts
+setup.sh start.sh stop.sh      Linux/macOS scripts
 ```
 
 ## Documentation

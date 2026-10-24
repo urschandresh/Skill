@@ -7,10 +7,12 @@ Final test evidence (last full run):
 
 | Suite | Result |
 |---|---|
-| Backend pytest (`backend/tests`, 10 files) | **72 passed**, 0 failed (~60 s) |
+| Backend pytest (`backend/tests`, 10 files) | **73 passed**, 0 failed (~60 s) |
 | Frontend Vitest | **20 passed** |
 | TypeScript `tsc -b` | clean |
 | Playwright E2E (desktop + mobile, real backend + built UI, temp DB) | **8 passed** |
+| Linux/macOS `setup.sh` / `start.sh` / `stop.sh` from a fresh GitHub clone | setup, start, double-start, stop, restart with data kept: all work |
+| Exploratory UI pass (30 actions across every page, real solver) | 30/30 passed, no console errors, no server errors |
 | Windows `.ps1` scripts | **not executed** (no PowerShell in the build environment) |
 
 ## Phase 1: Foundations ✅
@@ -102,3 +104,21 @@ historical adapter is tested only with synthetic data.
 - Windows execution of the scripts and app; real historical file; D/AN timings.
 - No authentication or multi-user support (by design for a local app); no DB migrations;
   no leave balances or notifications.
+
+## Local-run verification (after phase 7)
+
+Steps:
+- Fresh clone from GitHub, clean install with `requirements.txt` only.
+- Backend suite run under Python 3.11 and 3.13 (73 and 72 tests at the time, all passing);
+  setup also succeeded with Python 3.12.
+- Scripted walkthrough of 30 user actions on a running instance.
+
+Fixed during this pass:
+1. Infeasibility explanations were shown as raw JSON. They are now plain sentences.
+2. A new pre-solve check catches "required days × shift length > weekly hours cap"
+   (e.g. a 40 h analyst under the exact 5 × 9 h week).
+3. *Assign* on a replacement suggestion that breaks a rule failed with a bare error. It now
+   uses the same "list the violations, give a reason or cancel" confirmation as the editor.
+4. The cell editor offered the shift already in the cell, which caused an "already exists"
+   error. That shift is now hidden.
+5. `start.sh` recorded the wrong PID, so `stop.sh` left the server running. Fixed and re-tested.
