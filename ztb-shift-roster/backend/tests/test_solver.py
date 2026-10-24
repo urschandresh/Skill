@@ -253,3 +253,16 @@ def test_coverage_shortfall_flagged_by_validator():
     cov = [v for v in report.errors if v.rule == "coverage"]
     assert len(cov) == 5  # 6 shift-days, one covered
     assert report.to_dict()["coverage_percent"] < 20
+
+
+def test_hours_cap_below_required_days_is_explained():
+    from dataclasses import replace
+
+    inst = make_instance(days=14)
+    inst.analysts[100] = replace(inst.analysts[100], max_hours_per_week=40)
+    pre = preliminary_check(inst)
+    issue = next(i for i in pre["issues"] if i["type"] == "hours_vs_days")
+    assert "45 h exceeds the 40 h weekly limit" in issue["message"] and "SYN-001" in issue["message"]
+    r = solve(inst, time_limit=10)
+    assert r.status == "INFEASIBLE"
+    assert all(d.get("message") and "{" not in d["message"] for d in r.diagnostics)

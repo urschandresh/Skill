@@ -558,4 +558,35 @@ def diagnose(inst: ProblemInstance, time_limit: float, handle=None) -> list[dict
     if not core:
         return [{"type": "structural",
                  "message": "Conflict among always-on rules (eligibility, leave, rest/overlap, one shift per day)."}]
-    return core
+    return [{**info, "message": describe(inst, info)} for info in core]
+
+
+def describe(inst: ProblemInstance, info: dict[str, Any]) -> str:
+    """Plain-language sentence for one rule group of an infeasibility core."""
+    def acode(a):
+        return inst.analysts[a].code if a in inst.analysts else f"#{a}"
+
+    def slot(p, s):
+        pc = inst.projects[p].code if p in inst.projects else p
+        sc = inst.shifts[s].code if s in inst.shifts else s
+        return f"{pc}/{sc}"
+
+    pol = inst.policy
+    t = info.get("type")
+    if t == "coverage":
+        return f"{slot(info['project_id'], info['shift_id'])} on {info['date']} needs at least {info['min']} analyst(s)"
+    if t == "coverage_max":
+        return f"{slot(info['project_id'], info['shift_id'])} on {info['date']} allows at most {info['max']} analyst(s)"
+    if t == "weekly_days":
+        a = info["analyst_id"]
+        days = info["lower"] if info["lower"] == info["upper"] else f"{info['lower']}-{info['upper']}"
+        return f"{acode(a)} must work {days} day(s) in the week of {info['week_start']}"
+    if t == "weekly_hours":
+        return f"{acode(info['analyst_id'])} may work at most {info['max_hours']} h in the week of {info['week_start']}"
+    if t == "consecutive_days":
+        return f"{acode(info['analyst_id'])} may work at most {info['limit']} consecutive days"
+    if t == "consecutive_nights":
+        return f"{acode(info['analyst_id'])} may work at most {info['limit']} consecutive nights"
+    if t == "locked":
+        return f"Locked shift {slot(info['project_id'], info['shift_id'])} for {acode(info['analyst_id'])} on {info['date']} must be kept"
+    return f"{t} (min rest {pol.min_rest_hours} h)"

@@ -28,6 +28,8 @@ export function CellEditor({ roster, analystId, date, editable, busy, onApply, o
   const [choice, setChoice] = useState('')
   const [replace, setReplace] = useState(true)
   const existing = cell?.assignments ?? []
+  const present = new Set(existing.map((a) => a.shift_template_id))
+  const choices = templates.filter((t) => !present.has(t.id))
 
   const addOrReplace = () => {
     const t = tplById.get(Number(choice))
@@ -91,7 +93,7 @@ export function CellEditor({ roster, analystId, date, editable, busy, onApply, o
             <Label htmlFor="cell-shift">{existing.length ? 'Change to / add shift' : 'Assign shift'}</Label>
             <NativeSelect id="cell-shift" value={choice} onChange={(e) => setChoice(e.target.value)}>
               <option value="">Choose shift…</option>
-              {templates.map((t) => (
+              {choices.map((t) => (
                 <option key={t.id} value={t.id}>
                   {roster.projects.length > 1 ? `${projectCode.get(t.project_id)} ` : ''}{t.code} · {t.name} ({t.start_time}–{t.end_time})
                 </option>

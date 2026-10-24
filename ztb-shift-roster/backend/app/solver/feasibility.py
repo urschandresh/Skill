@@ -160,6 +160,33 @@ def preliminary_check(inst: ProblemInstance) -> dict[str, Any]:
                                f"leave less than {pol.min_rest_hours}h rest",
                 })
 
+    # Required working days x shortest possible shift must fit under the weekly hours cap.
+    shortest: dict[int, int] = {}
+    for slot in cands.slots:
+        s0, e0 = shift_interval(inst.shifts[slot.shift_id], slot.date)
+        shortest[slot.analyst_id] = min(shortest.get(slot.analyst_id, 10**9), e0 - s0)
+    if pol.weekly_mode == "exact":
+        ws = week_start(inst.start_date, pol.week_start_day)
+        while ws <= inst.end_date:
+            days = [ws + timedelta(days=i) for i in range(7)]
+            if days[0] >= inst.start_date and days[-1] <= inst.end_date:  # weeks fully inside the month
+                for a, analyst in inst.analysts.items():
+                    if a not in shortest:
+                        continue
+                    leave = sum(1 for d in days if absn.full_leave_days(a, d))
+                    n = pol.working_days_per_week
+                    need = max(0, n - leave) if pol.leave_counts_as_working_day else min(n, 7 - leave)
+                    need = min(need, 7 - sum(1 for d in days if absn.fully_unavailable(a, d)))
+                    cap = (analyst.max_hours_per_week or pol.max_hours_per_week) * 60
+                    if need * shortest[a] > cap:
+                        issues.append({
+                            "type": "hours_vs_days", "analyst_id": a, "week_start": ws.isoformat(),
+                            "message": f"{acode(a)}: {need} required working days x {shortest[a] / 60:g} h shifts "
+                                       f"= {need * shortest[a] / 60:g} h exceeds the {cap // 60} h weekly limit "
+                                       f"(week of {ws}). Raise the analyst's max hours or use the 'at most' weekly rule.",
+                        })
+            ws += timedelta(days=7)
+
     for a in inst.analysts:
         if not cand_days.get(a):
             entry = {"type": "analyst_unusable", "analyst_id": a,

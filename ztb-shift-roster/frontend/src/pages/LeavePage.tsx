@@ -10,6 +10,8 @@ import { toast } from 'sonner'
 
 import { EmptyState, ErrorAlert, Field, Loading, NativeSelect, PageHeader, StatusBadge, ViolationList } from '@/components/common'
 import { JobProgress } from '@/components/JobProgress'
+import { ChangeConfirmDialog } from '@/components/roster/CellEditor'
+import type { PendingChange } from '@/components/roster/useRosterEditor'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -22,9 +24,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { leaveSchema, type LeaveForm } from '@/lib/forms'
 import { addDays } from '@/lib/roster'
 import { useApiMutation } from '@/lib/useApiMutation'
-import { api } from '@/services/api'
+import { api, errorMessage } from '@/services/api'
 import { useAnalysts, useLeaves } from '@/services/queries'
-import type { Leave, Violation } from '@/types/api'
+import type { ChangeResult, Leave, RosterOp, Violation } from '@/types/api'
 
 const STATUS_COLORS: Record<string, string> = { pending: '#f59e0b', approved: '#22c55e', rejected: '#f43f5e', cancelled: '#64748b' }
 
@@ -129,17 +131,27 @@ function ImpactSheet({ leave, onClose }: { leave: Leave; onClose: () => void }) 
       setRunId(r.run_id)
     } catch (e) { setError(e) }
   }
+  // Same rule as the roster editor: dry-run first, and a change that breaks hard rules needs a reason.
+  const [pendingAssign, setPendingAssign] = useState<PendingChange | null>(null)
+  const sendAssign = async (rosterId: number, ops: RosterOp[], reason: string | null) => {
+    await api.post(`/rosters/${rosterId}/changes`, { ops, override_reason: reason })
+    toast.success(reason ? 'Shift reassigned with override' : 'Shift reassigned')
+    setPendingAssign(null)
+    await qc.invalidateQueries()
+  }
   const assign = async (rep: Replacement, analystId: number) => {
-    const roster = impact.data?.rosters.find((x) => x.roster_id === rep.roster_id)
-    const victim = roster?.affected_assignments.find((a) => a.date === rep.date && a.shift_template_id === rep.shift_template_id)
-    if (!victim) return
+    const ops: RosterOp[] = [{ op: 'move', from_analyst_id: leave.analyst_id, from_project_id: rep.project_id,
+      from_shift_template_id: rep.shift_template_id, from_date: rep.date, to_analyst_id: analystId,
+      to_project_id: rep.project_id, to_shift_template_id: rep.shift_template_id, to_date: rep.date }]
     try {
-      await api.post(`/rosters/${rep.roster_id}/changes`, { ops: [{ op: 'move', from_analyst_id: leave.analyst_id,
-        from_project_id: rep.project_id, from_shift_template_id: rep.shift_template_id, from_date: rep.date,
-        to_analyst_id: analystId, to_project_id: rep.project_id, to_shift_template_id: rep.shift_template_id, to_date: rep.date }] })
-      toast.success('Shift reassigned')
-      await qc.invalidateQueries()
-    } catch (e) { toast.error(String((e as Error).message)) }
+      const dry = await api.post<ChangeResult>(`/rosters/${rep.roster_id}/changes`, { ops, dry_run: true })
+      if (dry.introduced.length) {
+        setPendingAssign({ ops, introduced: dry.introduced, resolved: dry.resolved, label: `Assign to roster ${rep.roster_id}`,
+          rosterId: rep.roster_id } as PendingChange & { rosterId: number })
+      } else {
+        await sendAssign(rep.roster_id, ops, null)
+      }
+    } catch (e) { toast.error(errorMessage(e)) }
   }
   return (
     <Sheet open onOpenChange={(o) => !o && onClose()}>
@@ -204,6 +216,11 @@ function ImpactSheet({ leave, onClose }: { leave: Leave; onClose: () => void }) 
           </div>
         </div>
       </SheetContent>
+      {pendingAssign && (
+        <ChangeConfirmDialog pending={pendingAssign} busy={false} onCancel={() => setPendingAssign(null)}
+          onConfirm={(reason) => sendAssign((pendingAssign as PendingChange & { rosterId: number }).rosterId,
+            pendingAssign.ops, reason).catch((e) => toast.error(errorMessage(e)))} />
+      )}
     </Sheet>
   )
 }
