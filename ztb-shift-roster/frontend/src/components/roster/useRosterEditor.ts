@@ -79,12 +79,13 @@ export function useRosterEditor(rosterId: number) {
     if (step) void run(step.ops, step.next, 'Redo')
   }, [history, run])
 
+  const resetHistory = useCallback(() => setHistory(emptyHistory), [])
+  const dismissPending = useCallback(() => setPending(null), [])
+
   return {
-    apply, undo, redo, busy, pending,
+    apply, undo, redo, busy, pending, resetHistory, dismissPending,
     canUndo: history.past.length > 0,
     canRedo: history.future.length > 0,
     confirmPending: (reason: string) => pending && commit(pending.ops, reason, pending.after ?? history),
-    dismissPending: () => setPending(null),
-    resetHistory: () => setHistory(emptyHistory),
   }
 }

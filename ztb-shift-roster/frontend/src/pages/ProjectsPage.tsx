@@ -279,7 +279,7 @@ function ProjectCard({ project }: { project: Project }) {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-sm font-medium">Shift templates</h3>
-            <Button size="sm" variant="outline" onClick={() => setTpl('new')}><Plus /> Shift</Button>
+            <Button size="sm" variant="outline" onClick={() => setTpl('new')}><Plus /> Add shift</Button>
           </div>
           <Table>
             <TableHeader><TableRow><TableHead>Shift</TableHead><TableHead>Time</TableHead><TableHead>Hours</TableHead><TableHead /></TableRow></TableHeader>
@@ -303,7 +303,7 @@ function ProjectCard({ project }: { project: Project }) {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-sm font-medium">Staffing requirements</h3>
-            <Button size="sm" variant="outline" onClick={() => setStaffing(true)}><Plus /> Requirement</Button>
+            <Button size="sm" variant="outline" onClick={() => setStaffing(true)}><Plus /> Add requirement</Button>
           </div>
           <Table>
             <TableHeader><TableRow><TableHead>Shift</TableHead><TableHead>Applies to</TableHead><TableHead>Min</TableHead><TableHead>Max</TableHead><TableHead /></TableRow></TableHeader>

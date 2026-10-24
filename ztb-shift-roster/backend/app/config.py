@@ -43,6 +43,8 @@ class Settings:
     solver_workers: int = 1
     frontend_dist: Path | None = DEFAULT_FRONTEND_DIST
     log_level: str = "INFO"
+    # The interactive API docs page loads its assets from a public CDN, so it is off by default.
+    enable_api_docs: bool = False
     allowed_hosts: tuple[str, ...] = field(default=("127.0.0.1", "localhost"))
 
     @property
@@ -90,6 +92,7 @@ def load_settings() -> Settings:
         max_solver_seconds=int(env.get("ZTB_MAX_SOLVER_SECONDS", "600")),
         frontend_dist=Path(dist) if dist else DEFAULT_FRONTEND_DIST,
         log_level=env.get("ZTB_LOG_LEVEL", "INFO").upper(),
+        enable_api_docs=env.get("ZTB_ENABLE_API_DOCS") == "1",
     )
     settings.validate()
     return settings
