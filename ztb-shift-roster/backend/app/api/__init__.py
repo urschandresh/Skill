@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from . import admin, analysts, dashboard, health, leaves, organization, rosters, settings
+from . import admin, analysts, dashboard, health, imports, leaves, organization, rosters, settings
 
 router = APIRouter()
 router.include_router(health.router)
@@ -11,3 +11,4 @@ router.include_router(rosters.router)
 router.include_router(leaves.router)
 router.include_router(dashboard.router)
 router.include_router(admin.router)
+router.include_router(imports.router)

@@ -25,6 +25,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     engine = make_engine(settings.database_path)
     init_db(engine)
 
+    from .services.excel_import import ImportStore
     from .services.jobs import JobManager
 
     @asynccontextmanager
@@ -45,6 +46,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.engine = engine
     app.state.session_factory = make_session_factory(engine)
     app.state.jobs = JobManager(app.state.session_factory, workers=settings.solver_workers)
+    app.state.imports = ImportStore()
 
     # Middleware order: the last added runs first. Security checks run before CORS handling.
     app.add_middleware(

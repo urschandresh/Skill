@@ -1,0 +1,4 @@
+Employee Code,Start Date,End Date,Leave Type,Status,Start Time,End Time,Reason
+SYN-002,2026-11-09,2026-11-11,annual,approved,,,Synthetic
+SYN-004,2026-11-18,2026-11-18,casual,pending,,,Synthetic
+SYN-006,2026-11-05,2026-11-05,sick,approved,09:00,13:00,Synthetic partial
