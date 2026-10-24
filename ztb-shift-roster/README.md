@@ -39,6 +39,13 @@ leave, and keeps all data in a SQLite file on your own computer.
 
 ## Quick start (Windows)
 
+**One step:** download [`install.ps1`](https://raw.githubusercontent.com/urschandresh/Skill/ccr-fa255194-qgmtwb/ztb-shift-roster/install.ps1)
+and run `powershell -ExecutionPolicy Bypass -File .\install.ps1`. It checks or installs
+Python and Node.js (asking first), downloads ShiftOrbit to `Documents\ZTB-ShiftOrbit`, runs
+setup and starts the app.
+
+**Or step by step:**
+
 Prerequisites: **Python 3.11+** (python.org, tick "Add to PATH") and **Node.js 20+ LTS**.
 
 ```powershell
